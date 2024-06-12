@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "remote-ipython"
+version = "1.0.0b1"
+description = ""
+authors = ["likianta <likianta@foxmail.com>"]
+# readme = "README.md"
+packages = [{ include = "remote_ipython" }]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+ipykernel = "^6.27.1"
+ipython = "^8.12.0"
+jupyter-console = "^6.6.3"
+lk-logger = "*"
+lk-utils = "*"
+prompt-toolkit = "^3.0.41"
+# rich = "*"
+
+[[tool.poetry.source]]
+name = "tsinghua"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple/"
+priority = "primary"
+
+[[tool.poetry.source]]
+name = "likianta-host"
+url = "http://likianta.pro:2006/"
+priority = "supplemental"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
