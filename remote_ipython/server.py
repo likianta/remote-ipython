@@ -7,11 +7,13 @@ reference:
 
 if 1:
     import os
+    # import sys
     import typing as t
     from contextlib import contextmanager
     from os import getpid
     
     import lk_logger
+    # from lk_utils import load
     from lk_utils import new_thread
 
 if 2:  # import ipykernal related stuff
@@ -20,10 +22,9 @@ if 2:  # import ipykernal related stuff
     
     
     @contextmanager
-    def _suppress_kernel_warning() -> None:
-        lk_logger.mute()  # TEST: comment this line to see what info is buried.
-        yield
-        lk_logger.unmute()
+    def _suppress_kernel_warning() -> t.Iterator:
+        with lk_logger.mute():  # TEST: comment this to see what info is buried.
+            yield
     
     
     with _suppress_kernel_warning():
@@ -58,6 +59,17 @@ class KernelWrapper:
             ':rs1',
         )
         
+        # # https://stackoverflow.com/questions/35094744/where-is-kernel-1234
+        # # -json-located-in-jupyter-under-windows
+        # if sys.platform == 'win32':
+        #     kernel_file = '{}/AppData/Roaming/jupyter/runtime/kernel-{}.json' \
+        #         .format(os.environ['USERPROFILE'], self._pid)
+        # else:
+        #     raise NotImplementedError
+        # # https://stackoverflow.com/a/15268945/9695911
+        # info = load(kernel_file)
+        
+        # blocking
         with _suppress_kernel_warning():
             """
             suppress warning from `IPKernelApp.init_signal`, because we do \
