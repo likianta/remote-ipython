@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "remote-ipython"
-version = "1.0.0b6"
+version = "1.0.0b7"
 description = ""
 authors = ["Likianta <likianta@foxmail.com>"]
 # readme = "README.md"
@@ -14,7 +14,7 @@ ipython = ">=8.12.0"
 jupyter-console = "^6.6.3"
 lk-logger = "^6.0.5"
 # lk-utils = "^3.1.3"
-# prompt-toolkit = "^3.0.50"
+prompt-toolkit = "^3.0.50"
 
 [tool.poetry.group.dev.dependencies]
 ipython = { version = "^9.0.0", python = "^3.12" }

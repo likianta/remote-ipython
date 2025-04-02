@@ -11,24 +11,40 @@ from textwrap import dedent
 from threading import Thread
 from threading import current_thread
 from threading import main_thread
+from time import sleep
 
 lk_logger.setup(quiet=True, show_source=False)
 lk_logger.deflector.add(IPython, lk_logger.bprint, scope=True)
 lk_logger.deflector.add(jupyter_console, lk_logger.bprint, scope=True)
 
 
+class KernelThread(Thread):
+    @property
+    def kernel_app(self) -> IPKernelApp:
+        while not IPKernelApp.initialized():
+            sleep(0.1)
+        return IPKernelApp.instance()
+    
+    @property
+    def kernel_id(self) -> int:
+        return getattr(self.kernel_app, 'pid')
+    
+    def close(self) -> None:
+        self.kernel_app.close()
+
+
 def run_server(
     user_ns: dict = None, subthread: bool = False
-) -> t.Optional[Thread]:
+) -> t.Optional[KernelThread]:
     if subthread:
-        th = Thread(
+        thread = KernelThread(
             # name='remote_ipython_thread',
             target=_run,
             args=(user_ns or {},),
             daemon=True
         )
-        th.start()
-        return th
+        thread.start()
+        return thread
     else:
         _run(user_ns or {})
 
@@ -50,12 +66,16 @@ def _run(user_ns: dict) -> None:
     ).replace(' -\n    ', ' '))
     
     app = IPKernelApp.instance()
+    app.pid = pid
     if current_thread() is main_thread():
         app.init_signal = partial(_init_signal, app.init_signal)
     else:
         # workaround: since signals can only work in main thread, we mask this -
         # method to avoid warning from `app.initialize()`.
         app.init_signal = _skip_init_signal
+        # import atexit
+        # atexit.register(app.close)
+    
     app.initialize()
     app.user_ns = user_ns or {}
     app.start()  # blocking
