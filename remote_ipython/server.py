@@ -5,6 +5,7 @@ import os
 import signal
 import sys
 import typing as t
+from functools import cached_property
 from functools import partial
 from ipykernel.kernelapp import IPKernelApp
 from textwrap import dedent
@@ -19,7 +20,7 @@ lk_logger.deflector.add(jupyter_console, lk_logger.bprint, scope=True)
 
 
 class KernelThread(Thread):
-    @property
+    @cached_property
     def kernel_app(self) -> IPKernelApp:
         while not IPKernelApp.initialized():
             sleep(0.1)
@@ -30,7 +31,9 @@ class KernelThread(Thread):
         return getattr(self.kernel_app, 'pid')
     
     def close(self) -> None:
+        self.kernel_app.kernel.shell_stream.close()
         self.kernel_app.close()
+        IPKernelApp.clear_instance()
 
 
 def run_server(
@@ -73,8 +76,6 @@ def _run(user_ns: dict) -> None:
         # workaround: since signals can only work in main thread, we mask this -
         # method to avoid warning from `app.initialize()`.
         app.init_signal = _skip_init_signal
-        # import atexit
-        # atexit.register(app.close)
     
     app.initialize()
     app.user_ns = user_ns or {}
